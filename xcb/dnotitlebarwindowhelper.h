@@ -36,12 +36,13 @@ class DNoTitlebarWindowHelper : public QObject
 
 public:
     explicit DNoTitlebarWindowHelper(QWindow *window, quint32 windowID);
-    ~DNoTitlebarWindowHelper();
 
     inline QWindow *window() const
     { return reinterpret_cast<QWindow*>(const_cast<DNoTitlebarWindowHelper*>(this));}
 
     static void setWindowProperty(QWindow *window, const char *name, const QVariant &value);
+    static void freeDNoTitlebarWindowHelper(DNoTitlebarWindowHelper* that);
+    static DNoTitlebarWindowHelper* getHelperByWindow(QWindow* window);
 
     QString theme() const;
     QPointF windowRadius() const;
@@ -98,6 +99,7 @@ private slots:
     Q_SLOT void updateAutoInputMaskByClipPathFromProperty();
 
 private:
+    ~DNoTitlebarWindowHelper();
     bool windowEvent(QEvent *event);
     bool isEnableSystemMove(quint32 winId);
     bool updateWindowBlurAreasForWM();
@@ -127,7 +129,6 @@ private:
 
     static QHash<const QWindow*, DNoTitlebarWindowHelper*> mapped;
 
-    friend class DPlatformIntegration;
 };
 
 DPP_END_NAMESPACE

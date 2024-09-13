@@ -79,18 +79,26 @@ DNoTitlebarWindowHelper::DNoTitlebarWindowHelper(QWindow *window, quint32 window
 
 DNoTitlebarWindowHelper::~DNoTitlebarWindowHelper()
 {
-    g_pressPoint.remove(this);
-
     if (VtableHook::hasVtable(m_window)) {
         VtableHook::resetVtable(m_window);
     }
-
-    mapped.remove(qobject_cast<QWindow*>(parent()));
 
     if (m_window->handle()) { // 当本地窗口还存在时，移除设置过的窗口属性
         Utility::clearWindowProperty(m_windowID, Utility::internAtom(_DEEPIN_SCISSOR_WINDOW));
         DPlatformIntegration::clearNativeSettings(m_windowID);
     }
+}
+
+void DNoTitlebarWindowHelper::freeDNoTitlebarWindowHelper(DNoTitlebarWindowHelper* that)
+{
+    g_pressPoint.remove(that);
+    mapped.remove(qobject_cast<QWindow*>(that->parent()));
+    delete that;
+}
+
+DNoTitlebarWindowHelper* DNoTitlebarWindowHelper::getHelperByWindow(QWindow* window)
+{
+    return mapped.value(window);
 }
 
 void DNoTitlebarWindowHelper::setWindowProperty(QWindow *window, const char *name, const QVariant &value)

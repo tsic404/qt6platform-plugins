@@ -208,7 +208,7 @@ bool DPlatformIntegration::isEnableDxcb(const QWindow *window)
 
 bool DPlatformIntegration::setEnableNoTitlebar(QWindow *window, bool enable)
 {
-    if (enable && DNoTitlebarWindowHelper::mapped.value(window))
+    if (enable && DNoTitlebarWindowHelper::getHelperByWindow(window))
         return true;
 
     qCDebug(lcDxcb) << "enable titlebar:" << enable << "window:" << window
@@ -232,7 +232,7 @@ bool DPlatformIntegration::setEnableNoTitlebar(QWindow *window, bool enable)
         // 跟随窗口被销毁
         Q_UNUSED(new DNoTitlebarWindowHelper(window, xw->winId()))
     } else {
-        if (auto helper = DNoTitlebarWindowHelper::mapped.value(window)) {
+        if (auto helper = DNoTitlebarWindowHelper::getHelperByWindow(window)) {
             Utility::setNoTitlebar(window->winId(), false);
             helper->deleteLater();
         }
@@ -305,8 +305,8 @@ QPlatformWindow *DPlatformIntegration::createPlatformWindow(QWindow *window) con
 
     if (isNoTitlebar && DWMSupport::instance()->hasNoTitlebar()) {
         // 销毁旧的helper对象, 此处不用将mapped的值移除，后面会被覆盖
-        if (DNoTitlebarWindowHelper *helper = DNoTitlebarWindowHelper::mapped.value(window)) {
-            delete helper;
+        if (DNoTitlebarWindowHelper *helper = DNoTitlebarWindowHelper::getHelperByWindow(window)) {
+            DNoTitlebarWindowHelper::freeDNoTitlebarWindowHelper(helper);
         }
 
         QPlatformWindow *w = DPlatformIntegrationParent::createPlatformWindow(window);
